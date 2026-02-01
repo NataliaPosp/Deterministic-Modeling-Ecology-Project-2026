@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from scipy import sparse
-from scipy.sparse.linalg import spsolve
+from scipy.sparse.linalg import spsolve, splu
 
 class KlausmeierSolver:
     """
@@ -26,7 +26,6 @@ class KlausmeierSolver:
         self.hy = self.y[1] - self.y[0]
 
         # Boundary conditions (Dirichlet)
-
         self.bound = (self.X_flat == Lx) | (self.X_flat == 0) | (self.Y_flat == Ly) | (self.Y_flat == 0)
         self.L = self.laplacian()
 
@@ -65,6 +64,10 @@ class KlausmeierSolver:
             A_v[i, :] = 0
             A_v[i, i] = 1
 
+        # Konwersja na LU celem przyspieszenia
+        self.solve_u = splu(A_u.tocsc())
+        self.solve_v = splu(A_v.tocsc())
+
         return A_u.tocsr(), A_v.tocsr()
 
     def solve_step(self, u, v, a, m, A_u, A_v):
@@ -88,8 +91,10 @@ class KlausmeierSolver:
         right_u[self.bound] = 0
         right_v[self.bound] = 0
 
-        u_next = spsolve(A_u, right_u)
-        v_next = spsolve(A_v, right_v)
+        u_next = self.solve_u.solve(right_u)
+        v_next = self.solve_v.solve(right_v)
+        u_next[self.bound] = 0
+        v_next[self.bound] = 0
 
         return u_next, v_next
 
@@ -101,33 +106,81 @@ class KlausmeierSolver:
         :return: warunek początkowy na u, v
         """
         u_start = 2.0 * np.ones(self.Nx * self.Ny)
-        v_start = np.ones(self.Nx * self.Ny)
 
         if initial_state == 'perturbed':
+            v_start = np.zeros(self.Nx*self.Ny)
             v_view = v_start.reshape((self.Nx, self.Ny))
-            v_view[self.Nx // 4:3 * self.Nx // 4, self.Ny // 4:3 * self.Ny // 4] = 2.0
+            v_view[self.Nx // 4:3 * self.Nx // 4, self.Ny // 4:3 * self.Ny // 4] = 1.0
+            v_start = v_view.flatten()
+        else:
+            v_start = 2.0 * np.ones(self.Nx * self.Ny)
 
         return u_start, v_start
 
+    def steps_to_steady_state(self, u, v, a, m, A_u, A_v, tolerance=0.0001, iter=1000):
+        diff = 1.0
+        iter_count = 0
+
+        # Poszukiwanie zbieżności do stanu stacjonarnego
+        while diff > tolerance and iter_count < iter:
+            iter_count += 1
+            # Krok
+            u_next, v_next = self.solve_step(u, v, a, m, A_u, A_v)
+
+            diff = np.max(np.abs(v_next - v))
+            u, v = u_next, v_next
+
+        return u, v
 
     def solution_for_bifurcation(self, a_vals, m, d1, d2, initial_state='constant'):
         """
         Przeprowadzenie całego numerycznego wyliczenia rozwiązań w eksperymencie badania bifurkacji.
         """
+
         A_u, A_v = self.evolution_matrix(d1, d2)
-        v_max_list = []
+
+        v_max_down = []
+        v_mean_down = []
+
         u, v = self.initial(initial_state)
 
+        non_zero_u = None
+        non_zero_v = None
+        min_a = None
+
+        print("Simulation for a descending...")
         for a in tqdm.tqdm(a_vals):
-            diff = 1.0
-            iter_count = 0
+            u, v = self.steps_to_steady_state(u, v, a, m, A_u, A_v)
 
-            while diff > 0.0001 and iter_count < 1000:
-                iter_count += 1
-                u_next, v_next = self.solve_step(u,v,a,m,A_u,A_v)
+            if np.max(v) > 0.1:
+                non_zero_u = u.copy()
+                non_zero_v = v.copy()
+                min_a = a
 
-                diff = np.max(np.abs(v_next - v))
-                u, v = u_next, v_next
+            v_max_down.append(np.max(v))
+            v_mean_down.append(np.mean(v))
 
-            v_max_list.append(np.max(v))
-        return v_max_list
+        v_max_up = []
+        v_mean_up = []
+        a_vals_incr = a_vals[::-1]
+
+        if non_zero_v is not None:
+            u, v = non_zero_u.copy(), non_zero_v.copy()
+            start_a = min_a
+        else:
+            u, v = self.initial("perturbed")
+            start_a = 0.9
+
+        print("Simulation for a increasing...")
+
+        for a in tqdm.tqdm(a_vals_incr):
+            if a < start_a:
+                v_max_up.append(0.0)
+                v_mean_up.append(0.0)
+                continue
+
+            u, v = self.steps_to_steady_state(u, v, a, m, A_u, A_v)
+            v_max_up.append(np.max(v))
+            v_mean_up.append(np.mean(v))
+
+        return v_max_down, v_mean_down, v_max_up, v_mean_up
