@@ -5,6 +5,7 @@ import matplotlib.animation as animation
 from scipy import sparse
 from scipy.sparse.linalg import spsolve, splu
 
+
 class KlausmeierSolver:
     """
     Klasa rozwiązująca układ równań reakcji-dyfuzji na podstawie modelu Klausmeiera
@@ -108,9 +109,9 @@ class KlausmeierSolver:
         u_start = 2.0 * np.ones(self.Nx * self.Ny)
 
         if initial_state == 'perturbed':
-            v_start = np.zeros(self.Nx*self.Ny)
+            v_start = np.ones(self.Nx*self.Ny)
             v_view = v_start.reshape((self.Nx, self.Ny))
-            v_view[self.Nx // 4:3 * self.Nx // 4, self.Ny // 4:3 * self.Ny // 4] = 1.0
+            v_view[self.Nx // 4:3 * self.Nx // 4, self.Ny // 4:3 * self.Ny // 4] = 2.0
             v_start = v_view.flatten()
         else:
             v_start = 2.0 * np.ones(self.Nx * self.Ny)
@@ -152,7 +153,7 @@ class KlausmeierSolver:
         for a in tqdm.tqdm(a_vals):
             u, v = self.steps_to_steady_state(u, v, a, m, A_u, A_v)
 
-            if np.max(v) > 0.1:
+            if np.max(v) > 1.0:
                 non_zero_u = u.copy()
                 non_zero_v = v.copy()
                 min_a = a
@@ -164,14 +165,16 @@ class KlausmeierSolver:
         v_mean_up = []
         a_vals_incr = a_vals[::-1]
 
-        if non_zero_v is not None:
-            u, v = non_zero_u.copy(), non_zero_v.copy()
-            start_a = min_a
-        else:
-            u, v = self.initial("perturbed")
-            start_a = 0.9
+        #if non_zero_v is not None:
+        #    u, v = non_zero_u.copy(), non_zero_v.copy()
+        #else:
+        #   u, v = self.initial("perturbed")
 
         print("Simulation for a increasing...")
+
+        u = 2.0 * np.ones(self.Nx * self.Ny)
+        v = 2.0 * np.ones(self.Nx * self.Ny)
+        start_a = 0.9
 
         for a in tqdm.tqdm(a_vals_incr):
             if a < start_a:
@@ -179,8 +182,20 @@ class KlausmeierSolver:
                 v_mean_up.append(0.0)
                 continue
 
-            u, v = self.steps_to_steady_state(u, v, a, m, A_u, A_v)
+            u, v = self.steps_to_steady_state(u, v, a, m, A_u, A_v, iter=5000)
             v_max_up.append(np.max(v))
             v_mean_up.append(np.mean(v))
 
         return v_max_down, v_mean_down, v_max_up, v_mean_up
+
+    def tip_point(self, a_vals, v_down, v_up):
+        a_vals_down = a_vals
+        a_vals_up = a_vals[::-1]
+
+        tip_point_down = None
+        for i in range(len(v_down)):
+            if v_down[i] < 0.1:
+                tip_point_down = a_vals_down[i]
+                break
+
+        return tip_point_down
