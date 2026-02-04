@@ -103,16 +103,19 @@ class KlausmeierSolver:
         """
         Zdefiniowanie warunków początkowych do rozwiązania układu równań
         :param initial_state: 'constant' - rozpoczęcie z wysokiego poziomu biomasy
-                            'perturbed' - zaburzenie w środku siatki celem odwróconego procesu rozwiązania
+                            'centrally_perturbed' - zaburzenie w środku siatki celem odwróconego procesu rozwiązania
+                            'perturbed' - zaburzenie losowe
         :return: warunek początkowy na u, v
         """
         u_start = 2.0 * np.ones(self.Nx * self.Ny)
 
-        if initial_state == 'perturbed':
+        if initial_state == 'centrally_perturbed':
             v_start = np.ones(self.Nx*self.Ny)
             v_view = v_start.reshape((self.Nx, self.Ny))
             v_view[self.Nx // 4:3 * self.Nx // 4, self.Ny // 4:3 * self.Ny // 4] = 2.0
             v_start = v_view.flatten()
+        elif initial_state== 'perturbed':
+            v_start = np.ones(self.Nx*self.Ny) + np.random.rand(self.Nx * self.Ny)
         else:
             v_start = 2.0 * np.ones(self.Nx * self.Ny)
 
@@ -165,23 +168,20 @@ class KlausmeierSolver:
         v_mean_up = []
         a_vals_incr = a_vals[::-1]
 
-        #if non_zero_v is not None:
-        #    u, v = non_zero_u.copy(), non_zero_v.copy()
-        #else:
-        #   u, v = self.initial("perturbed")
+        if non_zero_v is not None:
+            u, v = non_zero_u.copy(), non_zero_v.copy()
+        else:
+           u, v = self.initial("perturbed")
 
         print("Simulation for a increasing...")
 
-        u = 2.0 * np.ones(self.Nx * self.Ny)
-        v = 2.0 * np.ones(self.Nx * self.Ny)
-        start_a = 0.9
+        #sztuczne narzucenie nie jest zgodne z założeniem, że chcemy startować
+        #z niezerowego rozwiązania stabilnego dla najmniejszego a
+        #u = 2.0 * np.ones(self.Nx * self.Ny)
+        #v = 2.0 * np.ones(self.Nx * self.Ny)
+        #start_a = 0.9
 
         for a in tqdm.tqdm(a_vals_incr):
-            if a < start_a:
-                v_max_up.append(0.0)
-                v_mean_up.append(0.0)
-                continue
-
             u, v = self.steps_to_steady_state(u, v, a, m, A_u, A_v, iter=5000)
             v_max_up.append(np.max(v))
             v_mean_up.append(np.mean(v))
