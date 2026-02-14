@@ -1,6 +1,8 @@
-import matplotlib.pyplot as plt
 import streamlit as st
+from pipeline.solver import KlausmeierSolver
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 def dispersion_analysis(a,m,d1,d2):
     delta = a**2 - 4*m**2
@@ -16,7 +18,7 @@ def dispersion_analysis(a,m,d1,d2):
     gu = v_star**2
     gv = 2*u_star*v_star - m
 
-    k_vals = np.linspace(0,3,200)
+    k_vals = np.linspace(0,10,200)
     lambdas = []
 
     for k in k_vals:
@@ -35,4 +37,28 @@ def dispersion_analysis(a,m,d1,d2):
     ax.set_ylabel("$Re(\lambda)$)")
     ax.grid(True, alpha=0.3)
     ax.legend()
+    return fig
+
+@st.cache_data
+def pattern_plotting(a,m,d1,d2,Nx,Ny,Lx,Ly,ht):
+    s = KlausmeierSolver(Nx, Ny, Lx, Ly, ht)
+    v_star = (a + np.sqrt(a ** 2 - 4 * m ** 2)) / (2 * m)
+    u = m / v_star * np.ones(Nx * Ny)
+    v = v_star * np.ones(Nx * Ny) + 0.8 * np.random.randn(Nx * Ny)
+    A_u, A_v = s.evolution_matrix(d1, d2)
+
+    iter_count = 0
+    while iter_count < 10000:
+        iter_count += 1
+        u_next, v_next = s.solve_step(u, v, a, m, A_u, A_v)
+        u, v = u_next, v_next
+
+        # Podgląd postępu
+        if iter_count % 1000 == 0:
+            print(f"Krok {iter_count}: sprawdzanie formowania wzorców...")
+
+    fig, ax = plt.subplots()
+    im = ax.imshow(v.reshape((Nx, Ny)), extent=[0, Lx, 0, Ly], origin='lower')
+    fig.colorbar(im, ax=ax,label="Gęstość biomasy v")
+    ax.set_title(f"Wzór dla a={a}, m={m}, d1={d1}, d2={d2}")
     return fig

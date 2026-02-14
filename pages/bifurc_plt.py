@@ -31,6 +31,7 @@ d2 = 0.05
 a_vals = np.linspace(1.8,0.0,500)
 a_vals_incr = a_vals[::-1]
 
+@st.cache_data
 def run_simulation():
     s = KlausmeierSolver(Nx,Nx,Lx,Ly,ht)
     v_max_desc, v_mean_desc, v_max_incr, v_mean_incr = s.solution_for_bifurcation(a_vals, m, d1, d2)
@@ -57,3 +58,6 @@ axes[1].set_ylabel("mean v")
 
 fig.tight_layout()
 st.pyplot(fig)
+
+st.write("Wykres po lewej przedstawia maksymalną wartość rozwiązania v w zależności od ilości "
+         "opadów a. Możemy zauważyć, że dla przyjętych parametrów ")

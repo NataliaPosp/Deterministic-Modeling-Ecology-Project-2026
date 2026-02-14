@@ -4,7 +4,7 @@ import os
 # Dodaje folder główny projektu do ścieżek wyszukiwania
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from pipeline.solver import KlausmeierSolver
-from pipeline.dispertion import dispersion_analysis
+from pipeline.functions import dispersion_analysis
 
 st.title("Analiza niestacjonarna Turinga")
 
@@ -188,16 +188,10 @@ st.latex(r'''
 k^2 \in \left[ \frac{(d_1 m + d_2 (-1-\frac{(a+\sqrt{a^2-4m^2})^2}{4m^2}) \pm \sqrt{(d_1m + d_2 (-1-\frac{(a+\sqrt{a^2-4m^2})^2}{4m^2})^2 - 4 d_1 d_2 ((\frac{(a+\sqrt{a^2-4m^2})^2}{4m^2})m + 2m (-1-\frac{(a+\sqrt{a^2-4m^2})^2}{4m^2}) ) }}{2 d_1 d_2} \right]
 ''')
 
-
-a_val = 0.95
-m_val = 0.45
-d1_val = 1.0
-d2_val = 0.05
-
 col1, col2 = st.columns(2)
 with col1:
     st.subheader("Parametry:")
-    a_val = st.slider("Opady", value=0.9)
+    a_val = st.slider("Opady", 0.0, 3.0, value=0.9)
     m_val = st.slider("Śmiertelność", 0.0,1.0, 0.45)
     d1_val = st.number_input("Dyfuzja wody:", value=1.0)
     d2_val = st.number_input("Dyfuzja biomasy:", value=0.01)

@@ -12,7 +12,7 @@ pages = {
         st.Page("../pages/turing_stability.py", title="Analiza niestabilności Turinga"),
     ],
     "Symulacje": [
-        st.Page("../pages/patterns_clean.py", title="Ogród wzorów"),
+        st.Page("../pages/patterns_garden.py", title="Ogród wzorów"),
     ],
 }
 
