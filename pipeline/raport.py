@@ -9,9 +9,9 @@ st.write('Projekt dotyczy ekosystemów półpustynnych (drylands), w których wo
 
 pages = {
     "Analiza teoretyczna": [
-        #st.Page("../notebooks/bif_clean.py", title="Ubezwymiarowienie"),
-        st.Page("../notebooks/bif_clean.py", title="Analiza bifurkacyjna"),
-        #st.Page("notebooks/turings_instability.py", title="Analiza niestabilności Turinga"),
+        st.Page("../notebooks/bifurcation_theory.py", title="Ubezwymiarowienie"),
+        st.Page("../notebooks/bifurc_plt.py", title="Analiza bifurkacyjna"),
+        st.Page("../notebooks/turing_stability.py", title="Analiza niestabilności Turinga"),
     ],
     "Symulacje": [
         st.Page("../notebooks/patterns_clean.py", title="Ogród wzorów"),
