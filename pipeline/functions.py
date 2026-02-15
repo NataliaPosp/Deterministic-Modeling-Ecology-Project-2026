@@ -43,6 +43,13 @@ def dispersion_analysis(a,m,d1,d2):
     ax.legend()
     return fig
 
+def v_stationary(a,m):
+    delta = a ** 2 - 4 * m ** 2
+    if delta <= 0:
+        st.warning("Delta <= 0!")
+        return None
+    return (a + np.sqrt(delta)) / (2 * m)
+
 @st.cache_data
 def pattern_plotting(a,m,d1,d2,Nx,Ny,Lx,Ly,ht):
     s = KlausmeierSolver(Nx, Ny, Lx, Ly, ht)
@@ -85,17 +92,19 @@ def patch_size_analysis(a_list,m,d1,d2):
         except Exception as e:
             print(f'Błąd wczytu: {e}')
 
-    domain_sizes = np.linspace(10,100,10)
+    domain_sizes = np.linspace(10,90,15)
     all_means = {}
-    Nx, Ny = 64, 64
+    Nx, Ny = 50, 50
 
     for a in a_list:
         means = []
         for L in tqdm.tqdm(domain_sizes):
-            s = KlausmeierSolver(Nx, Ny, L, L, 0.005)
-            v_star = (a + np.sqrt(a ** 2 - 4 * m ** 2)) / (2 * m)
-            u = m / v_star * np.ones(Nx * Ny)
-            v = v_star * np.ones(Nx * Ny) + 0.8 * np.random.randn(Nx * Ny)
+            s = KlausmeierSolver(Nx, Ny, L, L, 0.001)
+            #v_star = (a + np.sqrt(a ** 2 - 4 * m ** 2)) / (2 * m)
+            #u = m / v_star * np.ones(Nx * Ny)
+            #v = v_star * np.ones(Nx * Ny) + 0.8 * np.random.randn(Nx * Ny)
+            u = 2.0*np.ones(Nx*Ny)
+            v = np.ones(Nx*Ny)+0.2*np.random.randn(Nx * Ny)
             A_u, A_v = s.evolution_matrix(d1, d2)
 
             iter_count = 0
