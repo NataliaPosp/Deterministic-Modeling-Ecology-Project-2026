@@ -2,7 +2,11 @@ import streamlit as st
 from pipeline.solver import KlausmeierSolver
 import numpy as np
 import matplotlib.pyplot as plt
+import tqdm
+import json
+import os
 
+DATA_PATH = os.path.join(os.path.dirname(__file__), "patch_data.json")
 
 def dispersion_analysis(a,m,d1,d2):
     delta = a**2 - 4*m**2
@@ -61,4 +65,58 @@ def pattern_plotting(a,m,d1,d2,Nx,Ny,Lx,Ly,ht):
     im = ax.imshow(v.reshape((Nx, Ny)), extent=[0, Lx, 0, Ly], origin='lower')
     fig.colorbar(im, ax=ax,label="Gęstość biomasy v")
     ax.set_title(f"Wzór dla a={a}, m={m}, d1={d1}, d2={d2}")
-    return fig
+
+    variance = np.var(v)
+    return fig, variance
+
+@st.cache_data
+def patch_size_analysis(a_list,m,d1,d2):
+    """
+    Funkcja analizująca wpływ rozmiaru środowiska na istnienie i stabilność rozwiązań.
+
+    """
+    if os.path.exists(DATA_PATH):
+        try:
+            with open(DATA_PATH, "r") as f:
+                cached_res = json.load(f)
+            if all(str(a) in cached_res for a in a_list):
+                print("Wczytano dane z pliku!")
+                return cached_res
+        except Exception as e:
+            print(f'Błąd wczytu: {e}')
+
+    domain_sizes = np.linspace(10,100,10)
+    all_means = {}
+    Nx, Ny = 64, 64
+
+    for a in a_list:
+        means = []
+        for L in tqdm.tqdm(domain_sizes):
+            s = KlausmeierSolver(Nx, Ny, L, L, 0.005)
+            v_star = (a + np.sqrt(a ** 2 - 4 * m ** 2)) / (2 * m)
+            u = m / v_star * np.ones(Nx * Ny)
+            v = v_star * np.ones(Nx * Ny) + 0.8 * np.random.randn(Nx * Ny)
+            A_u, A_v = s.evolution_matrix(d1, d2)
+
+            iter_count = 0
+            v_prev = np.copy(v)
+            while iter_count < 10000:
+                iter_count += 1
+                u, v = s.solve_step(u, v, a, m, A_u, A_v)
+                if iter_count % 100 == 0:
+                    diff = np.linalg.norm(v - v_prev) / np.linalg.norm(v)
+                    if diff < 1e-4:  # Stan stacjonarny osiągnięty
+                        break
+                    v_prev = np.copy(v)
+            means.append(np.mean(v))
+            print(f"Zakończono dla L={L}")
+
+        all_means[str(a)] = {"sizes":domain_sizes.tolist(),
+                             "means": means}
+
+        with open(DATA_PATH, 'w') as f:
+            json.dump(all_means, f)
+
+    return all_means
+
+

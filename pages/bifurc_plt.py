@@ -1,25 +1,26 @@
 
 import sys
 import os
-
-# Dodaje folder główny projektu do ścieżek wyszukiwania
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from pipeline.solver import KlausmeierSolver
 
-import tqdm
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from scipy import sparse
-from scipy.sparse.linalg import spsolve
 import streamlit as st
-import pandas as pd
 
 
 st.header("Analiza bifurkacyjna i tipping points")
-st.markdown("Zaczniemy analizę od ustalonych parametrów. Niech $N_x, N_y = 41$, $L_x, L_y = 10$, $h_t=0.005$, $m=0.45$, $d_1=1.0$ oraz $d_2=0.01$")
+st.markdown("Zaczniemy analizę od ustalenia parametrów. \n Niech $N_x, N_y = 41$, $L_x, L_y = 10$, $h_t=0.005$, $m=0.45$, $d_1=1.0$ oraz $d_2=0.01$")
+
+st.write("Wykres po lewej przedstawia maksymalną wartość rozwiązania v w zależności od ilości "
+         "opadów a. Wraz ze zmniejszającym się a (wielkością opadów), spada również maksimum z wyliczonych numerycznie opadów."
+         " W pobliżu granicy wyznaczonej w analizie teoretycznej wynoszącej a=2m obserwujemy nagłą zmianę tendencji, skok i następnie "
+         " punkt krytyczny (tipping point), w którym system gwałtownie skacze"
+         " między stanem wegetacji a pustynią. Możemy zauważyć, że dla przyjętych parametrów iz niewymuszonym sztucznie punktem startowym na środku "
+         " pola (w naszym wypadku wyszukiwanym numerycznie) linia powrotna nie zdołała się podnieść - osiągnięcie stanu pustynnego było stanem ostatecznym. "
+         "")
 
 #Ustalone parametry
 Nx, Ny = 41, 41
@@ -59,5 +60,3 @@ axes[1].set_ylabel("mean v")
 fig.tight_layout()
 st.pyplot(fig)
 
-st.write("Wykres po lewej przedstawia maksymalną wartość rozwiązania v w zależności od ilości "
-         "opadów a. Możemy zauważyć, że dla przyjętych parametrów ")

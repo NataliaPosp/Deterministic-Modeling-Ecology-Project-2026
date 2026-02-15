@@ -175,12 +175,6 @@ class KlausmeierSolver:
 
         print("Simulation for a increasing...")
 
-        #sztuczne narzucenie nie jest zgodne z założeniem, że chcemy startować
-        #z niezerowego rozwiązania stabilnego dla najmniejszego a
-        #u = 2.0 * np.ones(self.Nx * self.Ny)
-        #v = 2.0 * np.ones(self.Nx * self.Ny)
-        #start_a = 0.9
-
         for a in tqdm.tqdm(a_vals_incr):
             u, v = self.steps_to_steady_state(u, v, a, m, A_u, A_v, iter=5000)
             v_max_up.append(np.max(v))

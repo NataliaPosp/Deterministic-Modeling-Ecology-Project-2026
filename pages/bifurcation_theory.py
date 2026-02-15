@@ -115,9 +115,6 @@ st.markdown("W takim wypadku ostateczna postać parametrów to:")
 st.latex(r'''
 m = \frac{M}{L}, \quad a = \frac{J A \sqrt{R}}{L \sqrt{L}}, \quad d_1 = 1.0, \quad d_2 = \frac{D_N}{D_W}, 
 ''')
-
-st.info(r"Dzięki temu każda jednostka $x$ w symulacji odpowiada $X_0$ metrom w rzeczywistości.")
-
 st.markdown("---")
 
 
