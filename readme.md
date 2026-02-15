@@ -16,4 +16,10 @@ problemie badawczym, oraz notebooki, w których prezentowane jest ich działanie
 Elementem podsumowującym jest raport (Streamlit), w którym przeprowadzona zostala analiza matematyczna 
 stabilności ekosystemu, podparta wynikami numerycznymi i przedstawieniem graficznym. 
 
+## Jak zacząć? 
+
+Celem uruchomienia raportu należy zaimportować repozytorium z Github, wczytać plik *requirements.txt*, 
+który zainstaluje wymagane pakiety, z których korzystają zaimplementowane funkcje oraz uruchomić poprzez
+terminal raport. Można to uczynić wywołaniem: *streamlit run pipeline/raport.py*. 
+
 

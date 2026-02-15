@@ -21,6 +21,7 @@ st.write("Wykres po lewej przedstawia maksymalną wartość rozwiązania v w zal
          " między stanem wegetacji a pustynią. Możemy zauważyć, że dla przyjętych parametrów iz niewymuszonym sztucznie punktem startowym na środku "
          " pola (w naszym wypadku wyszukiwanym numerycznie) linia powrotna nie zdołała się podnieść - osiągnięcie stanu pustynnego było stanem ostatecznym. "
          "")
+st.info("Poniżej wygenerują się dwa wykresy, które będą podstawą analizy bifurkacji. Czas wykonywania symulacji to około 2 minut.")
 
 #Ustalone parametry
 Nx, Ny = 41, 41

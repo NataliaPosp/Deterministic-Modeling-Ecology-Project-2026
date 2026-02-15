@@ -12,9 +12,10 @@ st.markdown("W zależności od wybranego rozmiaru obszaru obserwujemy odmienne z
             " roślinności łatwiej przetrwać i średnia jest większa niż 0. Dla najmniejszej wielkości opadów uzyskaliśmy rozwiązania o bardzo niskiej średniej, "
             "co wskazuje na to, że na małych obszarach nie są w stanie tworzyć wzorów. Większe opady stwarzają lepsze warunki do tworzenia się wzorów, co obserwujemy "
             "w niezerowej średniej już dla małych rozmiarów obszaru (L>10). Inne obserwacje możemy poczynić w przypadku bardzo małych opadów, dla których dla L<15 mamy stale "
-            " zerową średnią. Dla takich wartości opadów środowisko nie potrafi się odtworzyć. "
+            " zerową średnią. Dla takich wartości opadów środowisko nie potrafi się odtworzyć. Należy wspomnieć, że te tendencje byłyby prawdopodobnie uwidocznione jeszcze bardziej, "
+            "gdyby symulacja był przeprowadzona dla gęstszego wyboru podziału przedziału, z którego bierzemy wielkości domeny L. "
             "Wszystkie wielkości zaczynają się stabilizować dla wielkości krytycznej bliskiej L=64, od której zbiegają do asymptot w pobliżu poziomu rozważanego we "
-            "wcześniejszej analizie stanu stacjonarnego. W naszej analizie punkt ten wypada niżej, niż faktyczny stan stacjonarny ")
+            "wcześniejszej analizie stanu stacjonarnego. ")
 
 a_list = [1.2,1.5,2.0,2.3]
 m,d1,d2 = 0.45,80.0,0.01

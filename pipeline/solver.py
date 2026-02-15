@@ -183,6 +183,9 @@ class KlausmeierSolver:
         return v_max_down, v_mean_down, v_max_up, v_mean_up
 
     def tip_point(self, a_vals, v_down, v_up):
+        """
+        Funkcja pomocnicza wyliczająca tipping point.
+        """
         a_vals_down = a_vals
         a_vals_up = a_vals[::-1]
 

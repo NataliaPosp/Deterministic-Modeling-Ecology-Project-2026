@@ -6,9 +6,14 @@ import tqdm
 import json
 import os
 
-DATA_PATH = os.path.join(os.path.dirname(__file__), "patch_data.json")
+DATA_PATH = os.path.join(os.path.dirname(__file__), "../data/patch_data.json")
 
 def dispersion_analysis(a,m,d1,d2):
+    """
+    Funkcja generująca wykres funkcji dyspersji dla parametrów a - opadów, m - śmiertelności,
+    d1 i d2 - odpowiednio dyfuzji wody i biomasy.
+
+    """
     delta = a**2 - 4*m**2
     if delta <= 0:
         st.warning("Delta <= 0: Brak stabilnego punktu wegetacji dla tych parametrów.")
@@ -44,6 +49,10 @@ def dispersion_analysis(a,m,d1,d2):
     return fig
 
 def v_stationary(a,m):
+    """
+    Funkcja licząca stan stacjonarny ustalony na podstawie teoretycznej analizy niestabilności Turinga dla parametru opadów (a)
+    i śmiertelności biomasy (m).
+    """
     delta = a ** 2 - 4 * m ** 2
     if delta <= 0:
         st.warning("Delta <= 0!")
@@ -52,7 +61,12 @@ def v_stationary(a,m):
 
 @st.cache_data
 def pattern_plotting(a,m,d1,d2,Nx,Ny,Lx,Ly,ht):
+    """
+    Funkcja generująca wykresy patternów w formie mapy.
+    """
     s = KlausmeierSolver(Nx, Ny, Lx, Ly, ht)
+    if a ** 2 - 4 * m ** 2 < 0:
+        return st.info("Te parametry nie pozwalają na kształtowanie się wzorów.")
     v_star = (a + np.sqrt(a ** 2 - 4 * m ** 2)) / (2 * m)
     u = m / v_star * np.ones(Nx * Ny)
     v = v_star * np.ones(Nx * Ny) + 0.8 * np.random.randn(Nx * Ny)
@@ -79,7 +93,8 @@ def pattern_plotting(a,m,d1,d2,Nx,Ny,Lx,Ly,ht):
 @st.cache_data
 def patch_size_analysis(a_list,m,d1,d2):
     """
-    Funkcja analizująca wpływ rozmiaru środowiska na istnienie i stabilność rozwiązań.
+    Funkcja analizująca wpływ rozmiaru środowiska na istnienie i stabilność rozwiązań oraz zapisująca
+    do formatu json wyliczonych informacji celem lepszej wydajności kodu.
 
     """
     if os.path.exists(DATA_PATH):
