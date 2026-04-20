@@ -25,6 +25,12 @@ ipython_config.py
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/
+venv/
+env/
+__pycache__/
+*.ipynb_checkpoints
+.env
 
 # AWS User-specific
 .idea/**/aws.xml
